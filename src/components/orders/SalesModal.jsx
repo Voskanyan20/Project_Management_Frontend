@@ -100,6 +100,12 @@ export default function SalesModal({ open, onClose, onSaved }) {
         hasInvalid = true
         return false
       }
+      const product = getProductById(item.product_id)
+      if (product && Number(product.stock_quantity) < item.quantity) {
+        setError(`Недостаточно товара "${product.name}" на складе. Доступно: ${product.stock_quantity}`)
+        hasInvalid = true
+        return false
+      }
       return true
     })
 
@@ -235,11 +241,15 @@ export default function SalesModal({ open, onClose, onSaved }) {
                                 updateLineItem(
                                   item.tempId,
                                   'quantity',
-                                  parseInt(e.target.value) || 1
+                                  e.target.value === '' ? '' : parseInt(e.target.value)
                                 )
                               }
+                              onBlur={(e) => {
+                                if (!e.target.value || e.target.value === '0') {
+                                  updateLineItem(item.tempId, 'quantity', 1)
+                                }
+                              }}
                               disabled={loading}
-                              required
                             />
                           </td>
                           <td data-label="Цена за единицу">
@@ -252,11 +262,15 @@ export default function SalesModal({ open, onClose, onSaved }) {
                                 updateLineItem(
                                   item.tempId,
                                   'unit_price',
-                                  parseFloat(e.target.value) || 0
+                                  e.target.value === '' ? '' : parseFloat(e.target.value)
                                 )
                               }
+                              onBlur={(e) => {
+                                if (!e.target.value || e.target.value === '0') {
+                                  updateLineItem(item.tempId, 'unit_price', 0)
+                                }
+                              }}
                               disabled={loading}
-                              required
                             />
                           </td>
                           <td data-label="Подитог" className="numeric">
@@ -462,7 +476,7 @@ export default function SalesModal({ open, onClose, onSaved }) {
           margin: 16px auto;
           display: flex;
           flex-direction: column;
-          overflow: hidden;
+          overflow-y: auto;
         }
 
         .modal-body {
@@ -520,12 +534,17 @@ export default function SalesModal({ open, onClose, onSaved }) {
           .modal {
             width: 100%;
             margin: 8px 0;
+            max-height: calc(100vh - 16px);
           }
 
           .modal-header,
           .modal-footer,
           .modal-body {
             padding: 16px;
+          }
+
+          .modal-header h2 {
+            font-size: 1.25rem;
           }
 
           .sales-items-table {
@@ -551,7 +570,6 @@ export default function SalesModal({ open, onClose, onSaved }) {
             border: 1px solid #ddd;
             border-radius: 10px;
             margin-bottom: 12px;
-            padding: 12px;
             background: #fff;
           }
 
@@ -582,11 +600,215 @@ export default function SalesModal({ open, onClose, onSaved }) {
           .sales-items-table select,
           .sales-items-table input {
             width: 100%;
+            padding: 10px;
+            font-size: 16px;
           }
 
           .sales-total {
             flex-direction: column;
             align-items: flex-start;
+          }
+
+          .total-amount {
+            font-size: 1.25rem;
+          }
+
+          .btn {
+            padding: 10px 16px;
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .modal {
+            margin: 0;
+            max-height: 100vh;
+            border-radius: 0;
+          }
+
+          .modal-header,
+          .modal-footer,
+          .modal-body {
+            padding: 12px;
+          }
+
+          .modal-header h2 {
+            font-size: 1.1rem;
+          }
+
+          .section-header h3 {
+            font-size: 0.9rem;
+          }
+
+          .sales-items-table tr {
+            margin-bottom: 10px;
+          }
+
+          .sales-items-table td {
+            padding-left: 45%;
+            padding-top: 8px;
+            padding-bottom: 8px;
+          }
+
+          .sales-items-table td:before {
+            font-size: 0.85rem;
+            left: 12px;
+            width: 40%;
+          }
+
+          .sales-items-table select,
+          .sales-items-table input {
+            padding: 8px;
+            font-size: 14px;
+          }
+
+          .sales-total {
+            padding: 12px;
+          }
+
+          .total-label {
+            font-size: 0.9rem;
+          }
+
+          .total-amount {
+            font-size: 1.1rem;
+          }
+
+          .modal-footer {
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .modal-footer .btn {
+            width: 100%;
+          }
+
+          .form-group label {
+            font-size: 0.85rem;
+          }
+
+          .form-group select {
+            padding: 8px;
+            font-size: 14px;
+          }
+        }
+
+        @media (max-width: 360px) {
+          .modal {
+            margin: 0;
+            max-height: 100vh;
+            border-radius: 0;
+          }
+
+          .modal-header,
+          .modal-footer,
+          .modal-body {
+            padding: 10px;
+          }
+
+          .modal-header h2 {
+            font-size: 1rem;
+          }
+
+          .modal-close {
+            padding: 4px;
+          }
+
+          .section-header {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+          }
+
+          .section-header h3 {
+            font-size: 0.85rem;
+          }
+
+          .section-header .btn {
+            font-size: 0.85rem;
+            padding: 8px 12px;
+          }
+
+          .form-group {
+            margin-bottom: 12px;
+          }
+
+          .form-group label {
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+          }
+
+          .form-group select {
+            padding: 8px;
+            font-size: 13px;
+          }
+
+          .sales-items-section {
+            margin-top: 16px;
+            margin-bottom: 16px;
+          }
+
+          .sales-items-table tr {
+            margin-bottom: 8px;
+            border-radius: 8px;
+          }
+
+          .sales-items-table td {
+            padding-left: 42%;
+            padding-top: 6px;
+            padding-bottom: 6px;
+          }
+
+          .sales-items-table td:before {
+            font-size: 0.8rem;
+            left: 10px;
+            width: 38%;
+            top: 8px;
+          }
+
+          .sales-items-table select,
+          .sales-items-table input {
+            padding: 6px;
+            font-size: 13px;
+          }
+
+          .btn-icon {
+            padding: 6px;
+          }
+
+          .sales-total {
+            padding: 10px;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+          }
+
+          .total-label {
+            font-size: 0.85rem;
+          }
+
+          .total-amount {
+            font-size: 1rem;
+          }
+
+          .modal-footer {
+            padding: 10px;
+            gap: 6px;
+          }
+
+          .modal-footer .btn {
+            padding: 10px;
+            font-size: 13px;
+          }
+
+          .form-error {
+            padding: 10px;
+            font-size: 0.85rem;
+          }
+
+          .empty-state {
+            padding: 16px;
+            font-size: 0.85rem;
           }
         }
       `}</style>

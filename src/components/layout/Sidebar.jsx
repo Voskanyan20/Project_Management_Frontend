@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   BookOpen,
   LogOut,
+  RefreshCw,
 } from 'lucide-react'
 import { useAuth, getInitials } from '../../context/AuthContext'
 
@@ -21,6 +22,7 @@ const navSections = [
     items: [
       { to: '/orders', label: 'Заказы', icon: ShoppingBag },
       { to: '/products', label: 'Товары', icon: Package },
+      { to: '/restock', label: 'Пополнение', icon: RefreshCw },
       { to: '/categories', label: 'Категории', icon: BookOpen },
     ],
   },

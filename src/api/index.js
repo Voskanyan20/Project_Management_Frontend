@@ -13,6 +13,7 @@ export const getProducts = () => apiGet('/getProducts')
 export const createProduct = (data) => apiPost('/createProducts', data)
 export const updateProduct = (id, data) => apiPut(`/updateProduct/${id}`, data)
 export const deleteProduct = (id) => apiDelete(`/deleteProduct/${id}`)
+export const getRestockProducts = () => apiGet('/getRestockProducts')
 
 export const getCategories = () => apiGet('/getCategories')
 export const createCategory = (data) => apiPost('/createCategories', data)

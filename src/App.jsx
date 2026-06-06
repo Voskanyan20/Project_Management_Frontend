@@ -6,6 +6,7 @@ import SignIn from './pages/SignIn'
 import ECommerce from './pages/ECommerce'
 import Orders from './pages/Orders'
 import Products from './pages/Products'
+import RestockProducts from './pages/RestockProducts'
 import Categories from './pages/Categories'
 import Calendar from './pages/Calendar'
 
@@ -20,6 +21,7 @@ export default function App() {
               <Route index element={<ECommerce />} />
               <Route path="orders" element={<Orders />} />
               <Route path="products" element={<Products />} />
+              <Route path="restock" element={<RestockProducts />} />
               <Route path="categories" element={<Categories />} />
               <Route path="calendar" element={<Calendar />} />
             </Route>

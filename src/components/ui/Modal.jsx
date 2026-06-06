@@ -25,7 +25,9 @@ export default function Modal({ open, title, onClose, children, wide }) {
             <X size={18} />
           </button>
         </div>
-        {children}
+        <div className="modal-body">
+          {children}
+        </div>
       </div>
     </div>
   )
