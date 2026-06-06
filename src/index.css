@@ -1617,9 +1617,7 @@ a {
   .orders-table th:nth-child(5),
   .orders-table td:nth-child(5),
   .orders-table th:nth-child(6),
-  .orders-table td:nth-child(6),
-  .products-table th:nth-child(6),
-  .products-table td:nth-child(6) {
+  .orders-table td:nth-child(6) {
     display: none;
   }
 

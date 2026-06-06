@@ -218,14 +218,13 @@ export default function Products() {
                 <th>Статус</th>
                 <th>Остаток</th>
                 <th>Цена</th>
-                <th>Дата</th>
                 <th className="col-actions" />
               </tr>
             </thead>
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="empty-cell">Товары не найдены</td>
+                  <td colSpan={7} className="empty-cell">Товары не найдены</td>
                 </tr>
               ) : (
                 paginated.map((product) => (
@@ -249,7 +248,6 @@ export default function Products() {
                     <td><StatusBadge status={product.status} /></td>
                     <td>{product.stock_quantity}</td>
                     <td className="amount-cell">{formatCurrency(product.price)}</td>
-                    <td>{formatDate(product.createdAt)}</td>
                     <td>
                       <ActionsMenu
                         onEdit={() => openEdit(product)}
