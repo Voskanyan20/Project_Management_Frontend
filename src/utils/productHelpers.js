@@ -144,3 +144,85 @@ export function validateProductOptionValues(category, optionValues) {
 export function categoryHasOptions(category) {
   return normalizeCategoryOptions(category).length > 0
 }
+
+export function getCategoryParentId(category) {
+  if (!category) return null
+  const parentId = category.parent_id ?? category.parent?.id ?? null
+  if (parentId === null || parentId === undefined || parentId === '') return null
+  const parsed = Number(parentId)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null
+}
+
+export function isParentCategory(category) {
+  return !getCategoryParentId(category)
+}
+
+export function isSubcategory(category) {
+  return !!getCategoryParentId(category)
+}
+
+export function getParentCategories(categories) {
+  return categories.filter((category) => isParentCategory(category))
+}
+
+export function getSubcategories(categories, parentId) {
+  if (!parentId) return []
+  return categories.filter(
+    (category) => getCategoryParentId(category) === Number(parentId)
+  )
+}
+
+export function formatCategoryName(category, categories = []) {
+  if (!category?.name) return 'Без категории'
+
+  const parentId = getCategoryParentId(category)
+  if (!parentId) return category.name
+
+  const parentName =
+    category.parent?.name ||
+    categories.find((item) => Number(item.id) === Number(parentId))?.name
+
+  return parentName ? `${parentName} › ${category.name}` : category.name
+}
+
+export function resolveProductCategorySelection(product, categories) {
+  const category = product?.category
+  if (!category) {
+    return { parent_category_id: '', category_id: '' }
+  }
+
+  const parentId = getCategoryParentId(category)
+  if (parentId) {
+    return {
+      parent_category_id: String(parentId),
+      category_id: String(category.id),
+    }
+  }
+
+  const subcategories = getSubcategories(categories, category.id)
+  if (subcategories.length > 0) {
+    return {
+      parent_category_id: String(category.id),
+      category_id: '',
+    }
+  }
+
+  return {
+    parent_category_id: String(category.id),
+    category_id: String(category.id),
+  }
+}
+
+export function resolveSelectedProductCategory(categories, parentCategoryId, categoryId) {
+  if (categoryId) {
+    return categories.find((category) => String(category.id) === String(categoryId)) || null
+  }
+
+  if (parentCategoryId) {
+    const parent = categories.find((category) => String(category.id) === String(parentCategoryId))
+    const subcategories = getSubcategories(categories, parentCategoryId)
+    if (subcategories.length === 0) return parent || null
+  }
+
+  return null
+}

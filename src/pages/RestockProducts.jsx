@@ -7,7 +7,7 @@ import Pagination, {
   TableToolbar,
 } from '../components/ui/TableHelpers'
 import { getProductTypeLabel } from '../utils/productType'
-import { formatProductDisplayName, formatProductOptionValueLabels } from '../utils/productHelpers'
+import { formatProductDisplayName, formatProductOptionValueLabels, formatCategoryName } from '../utils/productHelpers'
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('hy-AM', {
@@ -58,7 +58,7 @@ export default function RestockProducts() {
     return (
       product.name?.toLowerCase().includes(q) ||
       product.description?.toLowerCase().includes(q) ||
-      product.category?.name?.toLowerCase().includes(q) ||
+      formatCategoryName(product.category).toLowerCase().includes(q) ||
       formatProductOptionValueLabels(product).toLowerCase().includes(q) ||
       getProductTypeLabel(product.product_type).toLowerCase().includes(q)
     )
@@ -160,7 +160,7 @@ export default function RestockProducts() {
                         </div>
                       </div>
                     </td>
-                    <td>{product.category?.name || 'Без категории'}</td>
+                    <td>{formatCategoryName(product.category)}</td>
                     <td><ProductTypeBadge type={product.product_type} /></td>
                     <td className={product.stock_quantity <= product.minimum_stock ? 'danger-text' : ''}>
                       {editingProduct === product.id ? (
@@ -370,7 +370,7 @@ export default function RestockProducts() {
                             <strong>{formatProductDisplayName(product)}</strong>
                             {product.description && <div className="text-sm text-gray-600">{product.description}</div>}
                           </td>
-                          <td>{product.category?.name || 'Без категории'}</td>
+                          <td>{formatCategoryName(product.category)}</td>
                           <td>{getProductTypeLabel(product.product_type)}</td>
                           <td className="text-center font-bold">
                             {getNeededQuantity(product)}

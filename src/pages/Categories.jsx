@@ -7,7 +7,7 @@ import Pagination, {
   TableToolbar,
 } from '../components/ui/TableHelpers'
 import ActionsMenu, { ConfirmDialog } from '../components/ui/ActionsMenu'
-import { formatCategoryOptionsSummary } from '../utils/productHelpers'
+import { formatCategoryOptionsSummary, formatCategoryName, getCategoryParentId } from '../utils/productHelpers'
 
 export default function Categories() {
   const [categories, setCategories] = useState([])
@@ -38,7 +38,14 @@ export default function Categories() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     if (!q) return categories
-    return categories.filter((cat) => cat.name?.toLowerCase().includes(q))
+    return categories.filter((cat) => {
+      const parentName = cat.parent?.name || ''
+      return (
+        cat.name?.toLowerCase().includes(q) ||
+        parentName.toLowerCase().includes(q) ||
+        formatCategoryName(cat).toLowerCase().includes(q)
+      )
+    })
   }, [categories, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
@@ -104,6 +111,8 @@ export default function Categories() {
               <tr>
                 <th>#</th>
                 <th>Название</th>
+                <th>Тип</th>
+                <th>Родитель</th>
                 <th>Опции</th>
                 <th>Дата создания</th>
                 <th className="col-actions" />
@@ -112,13 +121,15 @@ export default function Categories() {
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="empty-cell">Категории не найдены</td>
+                  <td colSpan={8} className="empty-cell">Категории не найдены</td>
                 </tr>
               ) : (
                 paginated.map((category, index) => (
                   <tr key={category.id}>
                     <td>{(page - 1) * pageSize + index + 1}</td>
                     <td>{category.name}</td>
+                    <td>{getCategoryParentId(category) ? 'Подкategория' : 'Категория'}</td>
+                    <td>{category.parent?.name || '—'}</td>
                     <td className="options-cell">{formatCategoryOptionsSummary(category)}</td>
                     <td>{new Date(category.createdAt || category.created_at || Date.now()).toLocaleDateString('ru-RU')}</td>
                     <td>

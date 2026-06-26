@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import Modal, { FormField, FormActions, FormError } from '../ui/Modal'
-import { createCategory, updateCategory } from '../../api'
-import { normalizeCategoryOptions } from '../../utils/productHelpers'
+import { createCategory, updateCategory, getCategories } from '../../api'
+import {
+  normalizeCategoryOptions,
+  getParentCategories,
+  getCategoryParentId,
+} from '../../utils/productHelpers'
 
 const emptyOptionValue = () => ({ label: '', price: '', cost_price: '' })
 const emptyOptionGroup = () => ({ name: '', values: [emptyOptionValue()] })
 
 const emptyForm = {
   name: '',
+  parent_id: '',
   options: [],
 }
 
@@ -24,6 +29,7 @@ function buildFormFromCategory(category) {
 
   return {
     name: category?.name || '',
+    parent_id: getCategoryParentId(category) ? String(getCategoryParentId(category)) : '',
     options,
   }
 }
@@ -31,6 +37,7 @@ function buildFormFromCategory(category) {
 function buildPayload(form) {
   return {
     name: form.name.trim(),
+    parent_id: form.parent_id ? Number(form.parent_id) : null,
     options: form.options
       .map((option) => ({
         name: option.name.trim(),
@@ -48,12 +55,24 @@ function buildPayload(form) {
 
 export default function CategoryFormModal({ open, category, onClose, onSaved }) {
   const [form, setForm] = useState(emptyForm)
+  const [allCategories, setAllCategories] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const isEdit = !!category
 
+  const parentCategories = useMemo(
+    () => getParentCategories(allCategories).filter((item) => !category || item.id !== category.id),
+    [allCategories, category]
+  )
+
+  const isParentWithChildren = useMemo(
+    () => Boolean(category?.subcategories?.length),
+    [category]
+  )
+
   useEffect(() => {
     if (!open) return
+    getCategories().then(setAllCategories).catch(console.error)
     if (category) {
       setForm(buildFormFromCategory(category))
     } else {
@@ -63,6 +82,7 @@ export default function CategoryFormModal({ open, category, onClose, onSaved }) 
   }, [open, category])
 
   const setName = (value) => setForm((current) => ({ ...current, name: value }))
+  const setParentId = (value) => setForm((current) => ({ ...current, parent_id: value }))
 
   const addOptionGroup = () => {
     setForm((current) => ({
@@ -162,14 +182,32 @@ export default function CategoryFormModal({ open, category, onClose, onSaved }) 
       <form onSubmit={handleSubmit}>
         <FormError message={error} />
 
-        <FormField label="Название" required>
-          <input
-            type="text"
-            value={form.name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </FormField>
+        <div className="form-grid">
+          <FormField label="Название" required>
+            <input
+              type="text"
+              value={form.name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </FormField>
+
+          <FormField label="Родительская категория">
+            <select
+              value={form.parent_id}
+              onChange={(e) => setParentId(e.target.value)}
+              disabled={isParentWithChildren}
+            >
+              <option value="">Основная категория</option>
+              {parentCategories.map((parent) => (
+                <option key={parent.id} value={parent.id}>{parent.name}</option>
+              ))}
+            </select>
+            {isParentWithChildren && (
+              <span className="field-hint">У категории есть подкategории, родителя изменить нельзя.</span>
+            )}
+          </FormField>
+        </div>
 
         <div className="category-options-section">
           <div className="category-options-header">

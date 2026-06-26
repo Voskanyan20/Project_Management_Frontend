@@ -14,7 +14,7 @@ import StatusBadge from '../components/ui/StatusBadge'
 import ProductTypeBadge from '../components/ui/ProductTypeBadge'
 import { getOrderItems, sortOrdersNewestFirst } from '../utils/orderHelpers'
 import { getProductTypeLabel } from '../utils/productType'
-import { formatProductDisplayName } from '../utils/productHelpers'
+import { formatProductDisplayName, formatCategoryName } from '../utils/productHelpers'
 
 function getProductStatus(product) {
   if (product.stock_quantity <= 0) return 'Draft'
@@ -59,7 +59,7 @@ export default function ECommerce() {
     const productIndex = Object.fromEntries(
       products.map((product) => [product.id, {
         name: formatProductDisplayName(product),
-        category: product.category?.name || 'Общий',
+        category: formatCategoryName(product.category),
         product_type: product.product_type,
       }])
     )
@@ -72,7 +72,9 @@ export default function ECommerce() {
         const name = item.product
           ? formatProductDisplayName(item.product)
           : productInfo.name || `Товар #${productId}`
-        const category = item.product?.category?.name || productInfo.category || 'Общий'
+        const category = item.product?.category
+          ? formatCategoryName(item.product.category)
+          : productInfo.category || 'Общий'
         const productType = item.product?.product_type || productInfo.product_type
 
         if (!productSales[productId]) {
@@ -209,7 +211,7 @@ export default function ECommerce() {
                           <span>{product.description || 'Нет описания'}</span>
                         </div>
                       </td>
-                      <td>{product.category?.name || 'Без категории'}</td>
+                      <td>{formatCategoryName(product.category)}</td>
                       <td><ProductTypeBadge type={product.product_type} /></td>
                       <td><StatusBadge status={getProductStatus(product)} /></td>
                       <td>{product.stock_quantity}</td>

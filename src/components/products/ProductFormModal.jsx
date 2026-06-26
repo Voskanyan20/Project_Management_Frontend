@@ -9,6 +9,10 @@ import {
   buildEmptyOptionValues,
   validateProductOptionValues,
   categoryHasOptions,
+  getParentCategories,
+  getSubcategories,
+  resolveProductCategorySelection,
+  resolveSelectedProductCategory,
 } from '../../utils/productHelpers'
 
 const emptyForm = {
@@ -18,6 +22,7 @@ const emptyForm = {
   price: '',
   stock_quantity: '',
   minimum_stock: '5',
+  parent_category_id: '',
   category_id: '',
   product_type: 'local',
   option_values: {},
@@ -30,9 +35,21 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
   const [error, setError] = useState('')
   const isEdit = !!product
 
+  const parentCategories = useMemo(
+    () => getParentCategories(categories),
+    [categories]
+  )
+
+  const availableSubcategories = useMemo(
+    () => getSubcategories(categories, form.parent_category_id),
+    [categories, form.parent_category_id]
+  )
+
+  const requiresSubcategory = availableSubcategories.length > 0
+
   const selectedCategory = useMemo(
-    () => categories.find((cat) => String(cat.id) === String(form.category_id)),
-    [categories, form.category_id]
+    () => resolveSelectedProductCategory(categories, form.parent_category_id, form.category_id),
+    [categories, form.parent_category_id, form.category_id]
   )
 
   const categoryOptions = useMemo(
@@ -44,30 +61,35 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
 
   useEffect(() => {
     if (open) {
-      getCategories().then(setCategories).catch(console.error)
-      if (product) {
-        setForm({
-          name: product.name || '',
-          description: product.description || '',
-          cost_price: String(product.cost_price ?? ''),
-          price: String(product.price ?? ''),
-          stock_quantity: String(product.stock_quantity ?? ''),
-          minimum_stock: String(product.minimum_stock ?? '5'),
-          category_id: String(product.category_id ?? product.category?.id ?? ''),
-          product_type: normalizeProductType(product.product_type),
-          option_values: normalizeProductOptionValues(product.option_values),
+      getCategories()
+        .then((loadedCategories) => {
+          setCategories(loadedCategories)
+          if (product) {
+            const selection = resolveProductCategorySelection(product, loadedCategories)
+            setForm({
+              name: product.name || '',
+              description: product.description || '',
+              cost_price: String(product.cost_price ?? ''),
+              price: String(product.price ?? ''),
+              stock_quantity: String(product.stock_quantity ?? ''),
+              minimum_stock: String(product.minimum_stock ?? '5'),
+              parent_category_id: selection.parent_category_id,
+              category_id: selection.category_id,
+              product_type: normalizeProductType(product.product_type),
+              option_values: normalizeProductOptionValues(product.option_values),
+            })
+          } else {
+            setForm(emptyForm)
+          }
         })
-      } else {
-        setForm(emptyForm)
-      }
+        .catch(console.error)
       setError('')
     }
   }, [open, product])
 
   const set = (key, value) => setForm((f) => ({ ...f, [key]: value }))
 
-  const handleCategoryChange = (categoryId) => {
-    const category = categories.find((cat) => String(cat.id) === String(categoryId))
+  const applyCategoryDefaults = (category) => {
     const nextOptionValues = categoryHasOptions(category)
       ? buildEmptyOptionValues(category)
       : {}
@@ -76,12 +98,46 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
       ? getPricingFromCategoryOptions(category.options, nextOptionValues)
       : { price: 0, cost_price: 0 }
 
+    return {
+      option_values: nextOptionValues,
+      price: categoryHasOptions(category) ? String(pricing.price) : '',
+      cost_price: categoryHasOptions(category) ? String(pricing.cost_price) : '',
+    }
+  }
+
+  const handleParentCategoryChange = (parentCategoryId) => {
+    const subcategories = getSubcategories(categories, parentCategoryId)
+    const parent = categories.find((category) => String(category.id) === String(parentCategoryId))
+
+    if (subcategories.length === 0) {
+      const defaults = applyCategoryDefaults(parent)
+      setForm((current) => ({
+        ...current,
+        parent_category_id: parentCategoryId,
+        category_id: parentCategoryId,
+        ...defaults,
+      }))
+      return
+    }
+
+    setForm((current) => ({
+      ...current,
+      parent_category_id: parentCategoryId,
+      category_id: '',
+      option_values: {},
+      price: '',
+      cost_price: '',
+    }))
+  }
+
+  const handleSubcategoryChange = (categoryId) => {
+    const category = categories.find((item) => String(item.id) === String(categoryId))
+    const defaults = applyCategoryDefaults(category)
+
     setForm((current) => ({
       ...current,
       category_id: categoryId,
-      option_values: nextOptionValues,
-      price: categoryHasOptions(category) ? String(pricing.price) : current.price,
-      cost_price: categoryHasOptions(category) ? String(pricing.cost_price) : current.cost_price,
+      ...defaults,
     }))
   }
 
@@ -105,6 +161,14 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
     setLoading(true)
     setError('')
 
+    const finalCategoryId = requiresSubcategory ? form.category_id : form.parent_category_id
+
+    if (!finalCategoryId) {
+      setError(requiresSubcategory ? 'Выберите подкategорию' : 'Выберите категорию')
+      setLoading(false)
+      return
+    }
+
     const validation = validateProductOptionValues(selectedCategory, form.option_values)
     if (!validation.valid) {
       setError(validation.message)
@@ -119,7 +183,7 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
       price: Number(form.price),
       stock_quantity: Number(form.stock_quantity),
       minimum_stock: Number(form.minimum_stock),
-      category_id: Number(form.category_id),
+      category_id: Number(finalCategoryId),
       product_type: normalizeProductType(form.product_type),
       option_values: validation.optionValues,
     }
@@ -149,16 +213,30 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
           </FormField>
           <FormField label="Категория" required>
             <select
-              value={form.category_id}
-              onChange={(e) => handleCategoryChange(e.target.value)}
+              value={form.parent_category_id}
+              onChange={(e) => handleParentCategoryChange(e.target.value)}
               required
             >
               <option value="">Выберите категорию</option>
-              {categories.map((cat) => (
+              {parentCategories.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
               ))}
             </select>
           </FormField>
+          {requiresSubcategory && (
+            <FormField label="Подкategория" required>
+              <select
+                value={form.category_id}
+                onChange={(e) => handleSubcategoryChange(e.target.value)}
+                required
+              >
+                <option value="">Выберите подкategорию</option>
+                {availableSubcategories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </FormField>
+          )}
           <FormField label="Тип закупки" required>
             <select value={form.product_type} onChange={(e) => set('product_type', e.target.value)} required>
               {PRODUCT_TYPES.map((type) => (

@@ -7,7 +7,7 @@ import ProductTypeBadge from '../components/ui/ProductTypeBadge'
 import ActionsMenu, { ConfirmDialog } from '../components/ui/ActionsMenu'
 import ProductFormModal from '../components/products/ProductFormModal'
 import { getProductTypeLabel } from '../utils/productType'
-import { formatProductDisplayName, formatProductOptionValueLabels } from '../utils/productHelpers'
+import { formatProductDisplayName, formatProductOptionValueLabels, formatCategoryName } from '../utils/productHelpers'
 import Pagination, {
   PageHeader,
   FilterTabs,
@@ -73,7 +73,7 @@ export default function Products() {
   }, [loadProducts])
 
   const categories = useMemo(() => {
-    const names = new Set(products.map((p) => p.category?.name).filter(Boolean))
+    const names = new Set(products.map((p) => formatCategoryName(p.category)).filter((name) => name !== 'Без категории'))
     return ['All', ...names]
   }, [products])
 
@@ -82,7 +82,7 @@ export default function Products() {
       products.map((product) => ({
         ...product,
         status: getProductStatus(product),
-        categoryName: product.category?.name || 'Без категории',
+        categoryName: formatCategoryName(product.category),
       })),
     [products]
   )
