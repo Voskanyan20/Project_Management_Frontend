@@ -2139,3 +2139,118 @@ a {
     padding: 24px;
   }
 }
+
+.options-cell {
+  max-width: 280px;
+  white-space: normal;
+  font-size: 13px;
+  color: var(--text-secondary, #6b7280);
+}
+
+.category-options-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border, #e5e7eb);
+}
+
+.category-options-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.category-options-header h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+}
+
+.category-options-header p,
+.category-options-empty {
+  margin: 0;
+  color: var(--text-secondary, #6b7280);
+  font-size: 13px;
+}
+
+.category-option-group {
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background: #fafafa;
+}
+
+.category-option-group-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+
+.category-option-values {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.category-option-values-head,
+.category-option-value-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.category-option-values-head {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary, #6b7280);
+  margin-bottom: 4px;
+}
+
+.category-option-value-row input {
+  width: 100%;
+}
+
+.product-options-fields {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.icon-btn.danger {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .category-option-values-head,
+  .category-option-value-row,
+  .product-options-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .category-options-header {
+    flex-direction: column;
+  }
+}

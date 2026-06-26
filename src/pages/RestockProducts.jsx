@@ -7,6 +7,7 @@ import Pagination, {
   TableToolbar,
 } from '../components/ui/TableHelpers'
 import { getProductTypeLabel } from '../utils/productType'
+import { formatProductDisplayName, formatProductOptionValueLabels } from '../utils/productHelpers'
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('hy-AM', {
@@ -58,6 +59,7 @@ export default function RestockProducts() {
       product.name?.toLowerCase().includes(q) ||
       product.description?.toLowerCase().includes(q) ||
       product.category?.name?.toLowerCase().includes(q) ||
+      formatProductOptionValueLabels(product).toLowerCase().includes(q) ||
       getProductTypeLabel(product.product_type).toLowerCase().includes(q)
     )
   })
@@ -88,6 +90,7 @@ export default function RestockProducts() {
         minimum_stock: product.minimum_stock,
         category_id: product.category_id,
         product_type: product.product_type,
+        option_values: product.option_values,
       })
       await loadProducts()
       setEditingProduct(null)
@@ -152,7 +155,7 @@ export default function RestockProducts() {
                     <td>
                       <div className="product-row-cell">
                         <div>
-                          <strong>{product.name}</strong>
+                          <strong>{formatProductDisplayName(product)}</strong>
                           <span>{product.description || 'Нет описания'}</span>
                         </div>
                       </div>
@@ -364,7 +367,7 @@ export default function RestockProducts() {
                         <tr key={product.id}>
                           <td>{index + 1}</td>
                           <td>
-                            <strong>{product.name}</strong>
+                            <strong>{formatProductDisplayName(product)}</strong>
                             {product.description && <div className="text-sm text-gray-600">{product.description}</div>}
                           </td>
                           <td>{product.category?.name || 'Без категории'}</td>

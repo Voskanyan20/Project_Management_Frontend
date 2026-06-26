@@ -14,6 +14,7 @@ import StatusBadge from '../components/ui/StatusBadge'
 import ProductTypeBadge from '../components/ui/ProductTypeBadge'
 import { getOrderItems, sortOrdersNewestFirst } from '../utils/orderHelpers'
 import { getProductTypeLabel } from '../utils/productType'
+import { formatProductDisplayName } from '../utils/productHelpers'
 
 function getProductStatus(product) {
   if (product.stock_quantity <= 0) return 'Draft'
@@ -57,7 +58,7 @@ export default function ECommerce() {
   const stats = useMemo(() => {
     const productIndex = Object.fromEntries(
       products.map((product) => [product.id, {
-        name: product.name,
+        name: formatProductDisplayName(product),
         category: product.category?.name || 'Общий',
         product_type: product.product_type,
       }])
@@ -68,7 +69,9 @@ export default function ECommerce() {
       getOrderItems(order).forEach((item) => {
         const productId = Number(item.product_id || item.product?.id || 0)
         const productInfo = productIndex[productId] || {}
-        const name = item.product?.name || productInfo.name || `Товар #${productId}`
+        const name = item.product
+          ? formatProductDisplayName(item.product)
+          : productInfo.name || `Товар #${productId}`
         const category = item.product?.category?.name || productInfo.category || 'Общий'
         const productType = item.product?.product_type || productInfo.product_type
 
@@ -138,7 +141,7 @@ export default function ECommerce() {
                       <td>{i + 1}</td>
                       <td>
                         <div className="product-cell">
-                          <strong>{product.name}</strong>
+                          <strong>{formatProductDisplayName(product)}</strong>
                           <span>{product.category} · {getProductTypeLabel(product.product_type)}</span>
                         </div>
                       </td>
@@ -202,7 +205,7 @@ export default function ECommerce() {
                       <td>{i + 1}</td>
                       <td>
                         <div className="product-cell">
-                          <strong>{product.name}</strong>
+                          <strong>{formatProductDisplayName(product)}</strong>
                           <span>{product.description || 'Нет описания'}</span>
                         </div>
                       </td>

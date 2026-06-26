@@ -1,14 +1,21 @@
+import { formatProductDisplayName } from './productHelpers'
+
 export function getOrderItems(order) {
   return order?.order_items ?? order?.orderItems ?? []
+}
+
+function getItemDisplayName(item) {
+  if (!item.product) return `Товар #${item.product_id}`
+  return formatProductDisplayName(item.product)
 }
 
 export function formatProductSummary(order) {
   const items = getOrderItems(order)
   if (items.length === 0) return 'Нет товаров'
   if (items.length === 1) {
-    return items[0].product?.name || `Товар #${items[0].product_id}`
+    return getItemDisplayName(items[0])
   }
-  const first = items[0].product?.name || 'Товар'
+  const first = getItemDisplayName(items[0])
   return `${first} +${items.length - 1} еще`
 }
 

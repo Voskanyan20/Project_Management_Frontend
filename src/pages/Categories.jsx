@@ -7,6 +7,7 @@ import Pagination, {
   TableToolbar,
 } from '../components/ui/TableHelpers'
 import ActionsMenu, { ConfirmDialog } from '../components/ui/ActionsMenu'
+import { formatCategoryOptionsSummary } from '../utils/productHelpers'
 
 export default function Categories() {
   const [categories, setCategories] = useState([])
@@ -103,6 +104,7 @@ export default function Categories() {
               <tr>
                 <th>#</th>
                 <th>Название</th>
+                <th>Опции</th>
                 <th>Дата создания</th>
                 <th className="col-actions" />
               </tr>
@@ -110,13 +112,14 @@ export default function Categories() {
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="empty-cell">Категории не найдены</td>
+                  <td colSpan={5} className="empty-cell">Категории не найдены</td>
                 </tr>
               ) : (
                 paginated.map((category, index) => (
                   <tr key={category.id}>
                     <td>{(page - 1) * pageSize + index + 1}</td>
                     <td>{category.name}</td>
+                    <td className="options-cell">{formatCategoryOptionsSummary(category)}</td>
                     <td>{new Date(category.createdAt || category.created_at || Date.now()).toLocaleDateString('ru-RU')}</td>
                     <td>
                       <ActionsMenu

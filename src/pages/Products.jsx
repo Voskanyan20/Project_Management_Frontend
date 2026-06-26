@@ -7,6 +7,7 @@ import ProductTypeBadge from '../components/ui/ProductTypeBadge'
 import ActionsMenu, { ConfirmDialog } from '../components/ui/ActionsMenu'
 import ProductFormModal from '../components/products/ProductFormModal'
 import { getProductTypeLabel } from '../utils/productType'
+import { formatProductDisplayName, formatProductOptionValueLabels } from '../utils/productHelpers'
 import Pagination, {
   PageHeader,
   FilterTabs,
@@ -104,7 +105,8 @@ export default function Products() {
           p.name.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q) ||
           p.categoryName.toLowerCase().includes(q) ||
-          getProductTypeLabel(p.product_type).toLowerCase().includes(q)
+          getProductTypeLabel(p.product_type).toLowerCase().includes(q) ||
+          formatProductOptionValueLabels(p).toLowerCase().includes(q)
       )
     }
     return list
@@ -231,6 +233,7 @@ export default function Products() {
                 </th>
                 <th>Товар</th>
                 <th>Категория</th>
+                <th>Опции</th>
                 <th>Тип закупки</th>
                 <th>Статус</th>
                 <th>Остаток</th>
@@ -241,7 +244,7 @@ export default function Products() {
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="empty-cell">Товары не найдены</td>
+                  <td colSpan={9} className="empty-cell">Товары не найдены</td>
                 </tr>
               ) : (
                 paginated.map((product) => (
@@ -256,12 +259,13 @@ export default function Products() {
                     <td>
                       <div className="product-row-cell">
                         <div>
-                          <strong>{product.name}</strong>
+                          <strong>{formatProductDisplayName(product)}</strong>
                           <span>{product.description || 'Нет описания'}</span>
                         </div>
                       </div>
                     </td>
                     <td>{product.categoryName}</td>
+                    <td className="options-cell">{formatProductOptionValueLabels(product) || '—'}</td>
                     <td><ProductTypeBadge type={product.product_type} /></td>
                     <td><StatusBadge status={product.status} /></td>
                     <td>{product.stock_quantity}</td>

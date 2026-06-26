@@ -8,6 +8,7 @@ import {
 } from '../../api'
 import { resolveCreatedOrderId, sortOrdersNewestFirst } from '../../utils/orderHelpers'
 import { getProductTypeLabel } from '../../utils/productType'
+import { formatProductDisplayName } from '../../utils/productHelpers'
 
 function formatMoney(value) {
   return new Intl.NumberFormat('hy-AM', {
@@ -103,7 +104,7 @@ export default function SalesModal({ open, onClose, onSaved }) {
       }
       const product = getProductById(item.product_id)
       if (product && Number(product.stock_quantity) < item.quantity) {
-        setError(`Недостаточно товара "${product.name}" на складе. Доступно: ${product.stock_quantity}`)
+        setError(`Недостаточно товара "${formatProductDisplayName(product)}" на складе. Доступно: ${product.stock_quantity}`)
         hasInvalid = true
         return false
       }
@@ -228,7 +229,7 @@ export default function SalesModal({ open, onClose, onSaved }) {
                               <option value="">Выберите товар</option>
                               {products.map((p) => (
                                 <option key={p.id} value={p.id}>
-                                  {p.name} ({getProductTypeLabel(p.product_type)}, запас: {p.stock_quantity})
+                                  {formatProductDisplayName(p)} ({getProductTypeLabel(p.product_type)}, запас: {p.stock_quantity})
                                 </option>
                               ))}
                             </select>
