@@ -1,4 +1,10 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'https://project-management-backend-bhp2.onrender.com'
+const configuredUrl = import.meta.env.VITE_API_URL
+const API_BASE =
+  configuredUrl != null && configuredUrl !== ''
+    ? configuredUrl
+    : import.meta.env.DEV
+      ? ''
+      : 'https://project-management-backend-bhp2.onrender.com'
 
 async function parseResponse(res) {
   const data = await res.json().catch(() => ({}))

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Printer } from 'lucide-react'
 import { getRestockProducts, updateProduct } from '../api'
-import StatusBadge from '../components/ui/StatusBadge'
+import ProductTypeBadge from '../components/ui/ProductTypeBadge'
 import Pagination, {
   PageHeader,
   TableToolbar,
 } from '../components/ui/TableHelpers'
+import { getProductTypeLabel } from '../utils/productType'
 
 function formatCurrency(value) {
   return new Intl.NumberFormat('hy-AM', {
@@ -21,6 +22,10 @@ function formatDate(dateStr) {
     day: 'numeric',
     year: 'numeric',
   })
+}
+
+function getNeededQuantity(product) {
+  return Number(product.minimum_stock) || 0
 }
 
 export default function RestockProducts() {
@@ -52,7 +57,8 @@ export default function RestockProducts() {
     return (
       product.name?.toLowerCase().includes(q) ||
       product.description?.toLowerCase().includes(q) ||
-      product.category?.name?.toLowerCase().includes(q)
+      product.category?.name?.toLowerCase().includes(q) ||
+      getProductTypeLabel(product.product_type).toLowerCase().includes(q)
     )
   })
 
@@ -80,7 +86,8 @@ export default function RestockProducts() {
         price: product.price,
         stock_quantity: parseInt(editQuantity),
         minimum_stock: product.minimum_stock,
-        category_id: product.category_id
+        category_id: product.category_id,
+        product_type: product.product_type,
       })
       await loadProducts()
       setEditingProduct(null)
@@ -123,6 +130,7 @@ export default function RestockProducts() {
               <tr>
                 <th>Товар</th>
                 <th>Категория</th>
+                <th>Тип закупки</th>
                 <th>Текущий остаток</th>
                 <th>Мин. запас</th>
                 <th>Необходимо</th>
@@ -134,7 +142,7 @@ export default function RestockProducts() {
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="empty-cell">
+                  <td colSpan={9} className="empty-cell">
                     {loading ? 'Загрузка...' : 'Товары для пополнения не найдены'}
                   </td>
                 </tr>
@@ -150,6 +158,7 @@ export default function RestockProducts() {
                       </div>
                     </td>
                     <td>{product.category?.name || 'Без категории'}</td>
+                    <td><ProductTypeBadge type={product.product_type} /></td>
                     <td className={product.stock_quantity <= product.minimum_stock ? 'danger-text' : ''}>
                       {editingProduct === product.id ? (
                         <input
@@ -165,12 +174,7 @@ export default function RestockProducts() {
                       )}
                     </td>
                     <td>{product.minimum_stock}</td>
-                    <td className="danger-text">
-                      {editingProduct === product.id
-                        ? Math.max(0, product.minimum_stock - parseInt(editQuantity || 0))
-                        : Math.max(0, product.minimum_stock - product.stock_quantity)
-                      }
-                    </td>
+                    <td className="danger-text">{getNeededQuantity(product)}</td>
                     <td className="amount-cell">{formatCurrency(product.price)}</td>
                     <td>{formatDate(product.createdAt)}</td>
                     <td>
@@ -346,13 +350,14 @@ export default function RestockProducts() {
                       <th>№</th>
                       <th>Товар</th>
                       <th>Категория</th>
+                      <th>Тип закупки</th>
                       <th>Необходимо</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filtered.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="text-center">Товары для пополнения не найдены</td>
+                        <td colSpan={5} className="text-center">Товары для пополнения не найдены</td>
                       </tr>
                     ) : (
                       filtered.map((product, index) => (
@@ -363,8 +368,9 @@ export default function RestockProducts() {
                             {product.description && <div className="text-sm text-gray-600">{product.description}</div>}
                           </td>
                           <td>{product.category?.name || 'Без категории'}</td>
+                          <td>{getProductTypeLabel(product.product_type)}</td>
                           <td className="text-center font-bold">
-                            {Math.max(0, product.minimum_stock - product.stock_quantity)}
+                            {getNeededQuantity(product)}
                           </td>
                         </tr>
                       ))

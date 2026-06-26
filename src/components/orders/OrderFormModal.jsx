@@ -13,6 +13,7 @@ import {
   calculateItemsTotal,
   resolveCreatedOrderId,
 } from '../../utils/orderHelpers'
+import { getProductTypeLabel } from '../../utils/productType'
 
 const ORDER_STATUSES = [
   { value: 'Pending', label: 'Ожидает' },
@@ -179,7 +180,7 @@ export default function OrderFormModal({ open, order, onClose, onSaved }) {
                 <option value="">Выберите товар</option>
                 {availableProducts.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} — {formatMoney(p.price)} (в наличии: {p.stock_quantity})
+                    {p.name} — {getProductTypeLabel(p.product_type)} — {formatMoney(p.price)} (в наличии: {p.stock_quantity})
                   </option>
                 ))}
               </select>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Modal, { FormField, FormActions, FormError } from '../ui/Modal'
 import { createProduct, updateProduct, getCategories } from '../../api'
+import { PRODUCT_TYPES, normalizeProductType } from '../../utils/productType'
 
 const emptyForm = {
   name: '',
@@ -10,6 +11,7 @@ const emptyForm = {
   stock_quantity: '',
   minimum_stock: '5',
   category_id: '',
+  product_type: 'local',
 }
 
 export default function ProductFormModal({ open, product, onClose, onSaved }) {
@@ -31,6 +33,7 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
           stock_quantity: String(product.stock_quantity ?? ''),
           minimum_stock: String(product.minimum_stock ?? '5'),
           category_id: String(product.category_id ?? product.category?.id ?? ''),
+          product_type: normalizeProductType(product.product_type),
         })
       } else {
         setForm(emptyForm)
@@ -53,6 +56,7 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
       stock_quantity: Number(form.stock_quantity),
       minimum_stock: Number(form.minimum_stock),
       category_id: Number(form.category_id),
+      product_type: normalizeProductType(form.product_type),
     }
     try {
       if (isEdit) {
@@ -82,6 +86,13 @@ export default function ProductFormModal({ open, product, onClose, onSaved }) {
               <option value="">Выберите категорию</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </FormField>
+          <FormField label="Тип закупки" required>
+            <select value={form.product_type} onChange={(e) => set('product_type', e.target.value)} required>
+              {PRODUCT_TYPES.map((type) => (
+                <option key={type.value} value={type.value}>{type.label}</option>
               ))}
             </select>
           </FormField>

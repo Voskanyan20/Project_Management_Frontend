@@ -673,6 +673,8 @@ a {
 .badge-pending, .badge-draft { background: #fef3c7; color: #b45309; }
 .badge-cancelled { background: #fee2e2; color: #b91c1c; }
 .badge-archived { background: #f3f4f6; color: #6b7280; }
+.badge-online { background: #dbeafe; color: #1d4ed8; }
+.badge-local { background: #ede9fe; color: #6d28d9; }
 
 /* Filter tabs */
 .filter-tabs {

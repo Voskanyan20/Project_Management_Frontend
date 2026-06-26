@@ -7,6 +7,7 @@ import {
   getOrders,
 } from '../../api'
 import { resolveCreatedOrderId, sortOrdersNewestFirst } from '../../utils/orderHelpers'
+import { getProductTypeLabel } from '../../utils/productType'
 
 function formatMoney(value) {
   return new Intl.NumberFormat('hy-AM', {
@@ -227,7 +228,7 @@ export default function SalesModal({ open, onClose, onSaved }) {
                               <option value="">Выберите товар</option>
                               {products.map((p) => (
                                 <option key={p.id} value={p.id}>
-                                  {p.name} (Запас: {p.stock_quantity})
+                                  {p.name} ({getProductTypeLabel(p.product_type)}, запас: {p.stock_quantity})
                                 </option>
                               ))}
                             </select>

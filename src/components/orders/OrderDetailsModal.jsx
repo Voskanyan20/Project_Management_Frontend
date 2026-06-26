@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { getOrderItems } from '../../utils/orderHelpers'
+import ProductTypeBadge from '../ui/ProductTypeBadge'
 
 function formatMoney(value) {
   return new Intl.NumberFormat('hy-AM', {
@@ -64,6 +65,7 @@ export default function OrderDetailsModal({ open, order, onClose }) {
                   <thead>
                     <tr>
                       <th>Название товара</th>
+                      <th>Тип закупки</th>
                       <th>Количество</th>
                       <th>Цена за единицу</th>
                       <th>Подитог</th>
@@ -75,6 +77,7 @@ export default function OrderDetailsModal({ open, order, onClose }) {
                       return (
                         <tr key={item.id || idx}>
                           <td className="product-name">{item.product?.name || `Товар #${item.product_id}`}</td>
+                          <td><ProductTypeBadge type={item.product?.product_type} /></td>
                           <td className="numeric">{item.quantity}</td>
                           <td className="numeric">{formatMoney(item.unit_price)}</td>
                           <td className="numeric">{formatMoney(subtotal)}</td>

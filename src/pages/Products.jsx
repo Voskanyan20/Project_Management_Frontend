@@ -3,8 +3,10 @@ import { useSearchParams } from 'react-router-dom'
 import { Plus, Trash2 } from 'lucide-react'
 import { getProducts, deleteProduct } from '../api'
 import StatusBadge from '../components/ui/StatusBadge'
+import ProductTypeBadge from '../components/ui/ProductTypeBadge'
 import ActionsMenu, { ConfirmDialog } from '../components/ui/ActionsMenu'
 import ProductFormModal from '../components/products/ProductFormModal'
+import { getProductTypeLabel } from '../utils/productType'
 import Pagination, {
   PageHeader,
   FilterTabs,
@@ -48,6 +50,7 @@ export default function Products() {
   const [activeTab, setActiveTab] = useState('All')
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('All')
+  const [typeFilter, setTypeFilter] = useState('All')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [selected, setSelected] = useState(new Set())
@@ -91,17 +94,21 @@ export default function Products() {
     if (categoryFilter !== 'All') {
       list = list.filter((p) => p.categoryName === categoryFilter)
     }
+    if (typeFilter !== 'All') {
+      list = list.filter((p) => p.product_type === typeFilter)
+    }
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(
         (p) =>
           p.name.toLowerCase().includes(q) ||
           p.description?.toLowerCase().includes(q) ||
-          p.categoryName.toLowerCase().includes(q)
+          p.categoryName.toLowerCase().includes(q) ||
+          getProductTypeLabel(p.product_type).toLowerCase().includes(q)
       )
     }
     return list
-  }, [enriched, activeTab, categoryFilter, search])
+  }, [enriched, activeTab, categoryFilter, typeFilter, search])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
   const paginated = filtered.slice((page - 1) * pageSize, page * pageSize)
@@ -200,6 +207,15 @@ export default function Products() {
               <option key={cat} value={cat}>{cat === 'All' ? 'Все категории' : cat}</option>
             ))}
           </select>
+          <select
+            className="category-select"
+            value={typeFilter}
+            onChange={(e) => { setTypeFilter(e.target.value); setPage(1) }}
+          >
+            <option value="All">Все типы закупки</option>
+            <option value="online">Онлайн закуп</option>
+            <option value="local">Внутри страны</option>
+          </select>
         </TableToolbar>
 
         <div className="data-table-wrapper">
@@ -215,6 +231,7 @@ export default function Products() {
                 </th>
                 <th>Товар</th>
                 <th>Категория</th>
+                <th>Тип закупки</th>
                 <th>Статус</th>
                 <th>Остаток</th>
                 <th>Цена</th>
@@ -224,7 +241,7 @@ export default function Products() {
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="empty-cell">Товары не найдены</td>
+                  <td colSpan={8} className="empty-cell">Товары не найдены</td>
                 </tr>
               ) : (
                 paginated.map((product) => (
@@ -245,6 +262,7 @@ export default function Products() {
                       </div>
                     </td>
                     <td>{product.categoryName}</td>
+                    <td><ProductTypeBadge type={product.product_type} /></td>
                     <td><StatusBadge status={product.status} /></td>
                     <td>{product.stock_quantity}</td>
                     <td className="amount-cell">{formatCurrency(product.price)}</td>
