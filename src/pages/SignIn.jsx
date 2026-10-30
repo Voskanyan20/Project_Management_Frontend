@@ -64,10 +64,6 @@ export default function SignIn() {
             {loading ? 'Входим...' : 'Войти'}
           </button>
         </form>
-
-        <p className="signin-hint">
-          Demo: karen@mail.ru / Karen123
-        </p>
       </div>
     </div>
   )
