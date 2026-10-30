@@ -72,7 +72,7 @@ export function ConfirmDialog({ open, title, message, onConfirm, onCancel, loadi
   if (!open) return null
 
   return (
-    <div className="modal-overlay" onClick={onCancel}>
+    <div className="modal-overlay">
       <div className="modal modal-sm" onClick={(e) => e.stopPropagation()}>
         <h3>{title}</h3>
         <p className="confirm-message">{message}</p>

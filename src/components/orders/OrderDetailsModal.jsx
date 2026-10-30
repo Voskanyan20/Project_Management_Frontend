@@ -27,7 +27,7 @@ export default function OrderDetailsModal({ open, order, onClose }) {
   const items = getOrderItems(order)
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Детали заказа ORD-{String(order.id).padStart(4, '0')}</h2>

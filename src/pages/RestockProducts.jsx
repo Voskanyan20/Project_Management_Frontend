@@ -228,7 +228,7 @@ export default function RestockProducts() {
       </div>
 
       {showPrintView && (
-        <div className="modal-overlay" onClick={() => setShowPrintView(false)}>
+        <div className="modal-overlay">
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <style>{`
               .modal-content {

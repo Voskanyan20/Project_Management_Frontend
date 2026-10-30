@@ -159,7 +159,7 @@ export default function SalesModal({ open, onClose, onSaved }) {
   const totalAmount = calculateTotalAmount()
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay">
       <div className="modal modal-lg" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>Создать продажу</h2>
